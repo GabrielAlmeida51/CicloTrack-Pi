@@ -12,11 +12,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
 
   function handleRegister() {
-    if (!name || !email || !password) {
-      Alert.alert('Erro', 'Preencha todos os campos');
-      return;
-    }
-    Alert.alert('Sucesso', 'Usuário cadastrado!');
+    Alert.alert('Cadastro', `Nome: ${name}\nEmail: ${email}\nSenha: ${password}`);
     navigation.replace('Login');
   }
 
