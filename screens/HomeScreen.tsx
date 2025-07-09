@@ -1,117 +1,308 @@
 // screens/HomeScreen.tsx
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, ImageBackground, Dimensions, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useUser } from '../App';
 
 // Para inserir sua foto, coloque o arquivo em /assets/images e ajuste o require abaixo
 const bannerImage = require('../assets/bike.jpg');
 
+const bgColor = '#181F23'; // preto/cinza escuro da imagem
+const green = '#A3FF6F'; // verde claro da imagem
+const grayText = '#BFC9C5';
+
+const screenWidth = Dimensions.get('window').width;
+const isSmallScreen = screenWidth < 500;
+
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
+  const { user } = useUser() || {};
+
+  // Animação de fade-in para o texto de impacto
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1200,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
+
+  // Dados fictícios para os indicadores e barra de progresso
+  const totalCO2 = 5; // toneladas
+  const currentCO2 = 2.3; // toneladas
+  const progress = currentCO2 / totalCO2;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Navbar */}
-      <View style={styles.navbar}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.navText}>Início</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Routes')}>
-          <Text style={styles.navText}>Rotas</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('CarbonCounter')}>
-          <Text style={styles.navText}>CO₂</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.navText}>Login</Text>
-        </TouchableOpacity>
+    <>
+      <View style={{ flex: 1, backgroundColor: bgColor }}>
+        {/* Removido o headerRow com o texto 'Bem-vindo ao CicloTrack!' */}
+        {/* Navbar fixa no topo */}
+        <View style={styles.navbar}>
+          <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.navItem}>
+            <MaterialCommunityIcons name="home" size={22} color={green} style={{ marginRight: 6 }} />
+            <Text style={[styles.navText, { color: green }]}>Início</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Routes')} style={styles.navItem}>
+            <MaterialCommunityIcons name="map-marker-path" size={22} color={grayText} style={{ marginRight: 6 }} />
+            <Text style={styles.navText}>Rotas</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('CarbonCounter')} style={styles.navItem}>
+            <MaterialCommunityIcons name="leaf" size={22} color={grayText} style={{ marginRight: 6 }} />
+            <Text style={styles.navText}>CO₂</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.navItem}>
+            <MaterialCommunityIcons name="account-circle" size={22} color={grayText} style={{ marginRight: 6 }} />
+            <Text style={styles.navText}>Login</Text>
+          </TouchableOpacity>
+        </View>
+        {/* Conteúdo principal com ScrollView para evitar corte em telas pequenas */}
+        <ScrollView contentContainerStyle={styles.scrollContainer} horizontal={false}>
+          <View style={[styles.containerRow, isSmallScreen && styles.containerColumn]}>
+            {/* Texto à esquerda */}
+            <View style={[styles.leftContent, isSmallScreen && { width: '100%' }]}>
+              <Text style={styles.naturalTitle}>CicloTracK</Text>
+              <Text style={styles.landingTitle}>Pedale para o futuro!</Text>
+              <Text style={styles.landingDesc}>
+                Descubra rotas seguras, calcule seu impacto ambiental e conecte-se com uma comunidade que valoriza a mobilidade sustentável.
+              </Text>
+              <TouchableOpacity style={styles.readMoreBtn} onPress={() => navigation.navigate('Routes')}>
+                <Text style={styles.readMoreText}>COMEÇAR</Text>
+              </TouchableOpacity>
+              {/* Indicadores/Estatísticas */}
+              <View style={styles.statsRow}>
+                <View style={[styles.statCard, { marginLeft: 32 }]}>
+                  <Text style={styles.statValue}>+1200 km</Text>
+                  <Text style={styles.statLabel}>Rotas mapeadas</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Text style={styles.statValue}>+300</Text>
+                  <Text style={styles.statLabel}>Usuários ativos</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Text style={styles.statValue}>2 t</Text>
+                  <Text style={styles.statLabel}>CO₂ economizado</Text>
+                </View>
+              </View>
+            </View>
+            {/* Lado direito vazio */}
+            <View style={styles.rightContent}>
+              {/* Imagem removida para teste visual */}
+            </View>
+          </View>
+        </ScrollView>
       </View>
-
-      {/* Título de boas-vindas */}
-      <View style={styles.titleSection}>
-        <Text style={styles.title}>Bem-vindo à CicloTrack</Text>
-      </View>
-
-      {/* Foto de destaque */}
-      <View style={styles.photoGallery}>
-        <Image source={bannerImage} style={styles.photo} resizeMode="cover" />
-      </View>
-
-      {/* Descrição do projeto */}
-      <View style={styles.descriptionContainer}>
-        <Text style={styles.descriptionText}>
-          Descubra rotas seguras e otimizadas para suas pedaladas, calcule seu impacto ambiental e conecte-se com uma comunidade que valoriza a mobilidade sustentável. Com a CicloTrack, cada pedalada conta para um futuro mais verde.
-        </Text>
-      </View>
-
-      {/* Acesso rápido */}
-      <View style={styles.quickActions}>
-        <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Routes')}>
-          <Text style={styles.actionText}>Planejar Rota</Text>
+      {/* Botão de configurações no canto inferior direito, só aparece se logado */}
+      {user && user.logged && (
+        <TouchableOpacity
+          style={styles.settingsBtn}
+          onPress={() => navigation.navigate('Config')}
+          activeOpacity={0.8}
+        >
+          <MaterialCommunityIcons name="cog" size={32} color={bgColor} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('CarbonCounter')}>
-          <Text style={styles.actionText}>Ver CO₂</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Rodapé */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>© 2025 CicloTrack. Todos os direitos reservados.</Text>
-      </View>
-    </ScrollView>
+      )}
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#fff' },
   navbar: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     alignItems: 'center',
-    height: 60,
-    backgroundColor: '#2E8B57',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 24,
+    paddingTop: 18,
+    paddingBottom: 8,
+    backgroundColor: bgColor,
+    borderBottomWidth: 1,
+    borderBottomColor: '#23292D',
+    gap: 10,
   },
-  navText: { color: '#fff', fontSize: 18, fontWeight: '600' },
-  titleSection: { marginVertical: 25, alignItems: 'center' },
-  title: { fontSize: 24, fontWeight: '800', color: '#2E8B57', fontFamily: 'sans-serif-medium' },
-  photoGallery: {
-    height: 200,
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#e0e0e0',
-  },
-  photo: { width: '100%', height: '100%' },
-  descriptionContainer: {
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  descriptionText: {
-    fontSize: 18,
-    lineHeight: 28,
-    color: '#555',
-    textAlign: 'center',
-  },
-  quickActions: {
+  navItem: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 30,
+    alignItems: 'center',
+    marginLeft: 8,
   },
-  actionButton: {
-    backgroundColor: '#2E8B57',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+  navText: {
+    color: grayText,
+    fontSize: 15,
+    fontWeight: '600',
+    marginLeft: 6,
   },
-  actionText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  footer: {
-    height: 50,
+  containerRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingTop: 32,
+    backgroundColor: bgColor,
+  },
+  containerColumn: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  leftContent: {
+    flex: 1.2,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingLeft: 24,
+    paddingRight: 24,
+  },
+  rightContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  naturalTitle: {
+    color: green,
+    fontSize: 28,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    marginBottom: 1,
+  },
+  landingTitle: {
+    color: grayText,
+    fontSize: 23,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  landingDesc: {
+    color: grayText,
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'left',
+  },
+  readMoreBtn: {
+    backgroundColor: green,
+    borderRadius: 22,
+    paddingVertical: 9,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  readMoreText: {
+    color: bgColor,
+    fontWeight: 'bold',
+    fontSize: 14,
+    letterSpacing: 1,
+  },
+  illustration: {
+    width: 100,
+    height: 130,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2E8B57',
+    backgroundColor: bgColor,
+    paddingVertical: 24,
   },
-  footerText: { color: '#fff', fontSize: 12 },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    marginBottom: 6,
+    justifyContent: 'center',
+  },
+  statCard: {
+    backgroundColor: '#23292D',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 13,
+    alignItems: 'center',
+    minWidth: 70,
+  },
+  statValue: {
+    color: green,
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  statLabel: {
+    color: grayText,
+    fontSize: 11,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  progressContainer: {
+    marginTop: 8,
+    marginBottom: 8,
+    width: '100%',
+    maxWidth: 260,
+    alignSelf: 'center',
+  },
+  progressLabel: {
+    color: grayText,
+    fontSize: 12,
+    marginBottom: 1,
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 10,
+    backgroundColor: '#23292D',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: green,
+    borderRadius: 8,
+  },
+  progressValue: {
+    color: grayText,
+    fontSize: 11,
+    marginTop: 1,
+    textAlign: 'right',
+  },
+  impactText: {
+    color: green,
+    fontSize: 13,
+    fontWeight: 'bold',
+    marginTop: -4,
+    textAlign: 'left',
+    maxWidth: 260,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    marginBottom: 8,
+  },
+  gearBtn: {
+    padding: 6,
+    borderRadius: 16,
+    backgroundColor: 'rgba(163,255,111,0.10)',
+  },
+  title: {
+    color: green,
+    fontSize: 28,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    marginBottom: 1,
+  },
+  settingsBtn: {
+    position: 'absolute',
+    bottom: 32,
+    right: 24,
+    backgroundColor: green,
+    borderRadius: 32,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: green,
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 300,
+  },
 });
